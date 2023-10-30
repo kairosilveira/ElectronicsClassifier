@@ -1,0 +1,1 @@
+in this directory (trained_models) the models will be saved for now. Maybe I use MLFlow in the future to handle that.
