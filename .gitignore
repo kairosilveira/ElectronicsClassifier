@@ -1,1 +1,15 @@
-resistors
+tests.ipynb
+pytorch.ipynb
+references.txt
+model_class.py
+__pycache__
+
+run.py
+
+
+#folders
+model/trained_models/*
+!model/trained_models/info.txt
+
+data/data_resistors/*
+!data/data_resistors/info.txt
