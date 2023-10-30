@@ -1,1 +1,9 @@
 resistors
+tests.ipynb
+pytorch.ipynb
+references.txt
+trained_models
+model_class.py
+__pycache__
+data
+run.py
