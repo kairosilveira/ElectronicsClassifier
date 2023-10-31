@@ -1,1 +1,0 @@
-The images will be saved in this directory(data_resistors) when downloaded or split into train and test.

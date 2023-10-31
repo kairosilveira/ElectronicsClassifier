@@ -1,7 +1,6 @@
 tests.ipynb
 pytorch.ipynb
 references.txt
-model_class.py
 __pycache__
 
 run.py
@@ -11,5 +10,5 @@ run.py
 model/trained_models/*
 !model/trained_models/info.txt
 
-data/data_resistors/*
-!data/data_resistors/info.txt
+data/data_electronic/*
+!data/data_electronic/info.txt
