@@ -2,18 +2,27 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.transforms as transforms
+
 import torchvision.datasets as datasets
-from data.preprocess_data import AutoOrient, MakeSquare, ReduceImage
 from model.model_class import ElectronicsClassifier
 
-def train_model(train_dataset, test_dataset, num_epochs, batch_size, lr, loss_function, optimizer, device):  
+def train_eval_model(
+        train_dir, 
+        test_dir, 
+        num_epochs, 
+        batch_size, 
+        lr, 
+        loss_function, 
+        optimizer, 
+        transform_train,
+        transform_test,
+        device,):  
     """
     Train a neural network model on a given training dataset and evaluate it on a test dataset.
 
     Args:
-    train_dataset (torch.utils.data.Dataset): The training dataset.
-    test_dataset (torch.utils.data.Dataset): The test dataset.
+    train_dir (str): The path to the dataset.
+    test_dataset (str): The path to the dataset.
     num_epochs (int): The number of training epochs.
     batch_size (int): The batch size for training.
     lr (float): The learning rate for optimization.
@@ -29,7 +38,7 @@ def train_model(train_dataset, test_dataset, num_epochs, batch_size, lr, loss_fu
     and returns the test accuracy.
 
     Example:
-    >>> train_dataset = CustomDataset(train_data, train_labels)
+    >>> train_dir = CustomDataset(train_data, train_labels)
     >>> test_dataset = CustomDataset(test_data, test_labels)
     >>> num_epochs = 10
     >>> batch_size = 32
@@ -37,17 +46,22 @@ def train_model(train_dataset, test_dataset, num_epochs, batch_size, lr, loss_fu
     >>> loss_function = nn.CrossEntropyLoss()
     >>> optimizer = optim.Adam
     >>> device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    >>> test_accuracy = train_model(train_dataset, test_dataset, num_epochs, batch_size, lr, loss_function, optimizer, device)
+    >>> test_accuracy = train_model(train_dir, test_dataset, num_epochs, batch_size, lr, loss_function, optimizer, device)
     >>> print(f"Test Accuracy: {test_accuracy:.2f}")
 
     """
     
+
+
+    # Create datasets
+    train_dir = datasets.ImageFolder(train_dir, transform=transform_train)
+    test_dataset = datasets.ImageFolder(test_dir, transform=transform_test)
     
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_dir, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # Initialize the model
-    num_classes = len(train_dataset.classes)
+    num_classes = len(train_dir.classes)
     model = ElectronicsClassifier(num_classes)  # Import the model class
 
     # Define loss function and optimizer
