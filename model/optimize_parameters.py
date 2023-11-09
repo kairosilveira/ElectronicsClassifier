@@ -4,19 +4,20 @@ import torch.optim as optim
 import torch
 import torchvision.transforms as transforms
 from hyperopt import hp, tpe, fmin
-from model.train_model import train_eval_model
+from model.train_eval_model import train_model, eval_model
 from data.preprocess_data import AutoOrient, MakeSquare, ReduceImage
 from functools import partial 
-
+from time import time
 
 
 # Define the objective function to minimize (maximize validation accuracy)
 def objective(params, train_dir, val_dir, device):
+    
+    start = time()
     # train params
     num_epochs = int(params['num_epochs'])
     batch_size = params['batch_size']
     lr = params['lr']
-    loss_function = params['loss_function']
     optimizer = params['optimizer']
 
     # Transform params
@@ -56,18 +57,29 @@ def objective(params, train_dir, val_dir, device):
     ])
 
     # Call the train_model function with the specified hyperparameters and validation set
-    accuracy = train_eval_model(train_dir, 
-                                val_dir, 
-                                num_epochs, 
-                                batch_size, 
-                                lr, 
-                                loss_function, 
-                                optimizer, 
-                                transform_train, 
-                                transform_test, 
-                                device)
+    model = train_model( 
+                train_dir, 
+                num_epochs, 
+                batch_size, 
+                lr,
+                optimizer, 
+                transform_train,  
+                device)
+    
+    accuracy, _ = eval_model(
+                model, 
+                val_dir,
+                transform_test,
+                batch_size,
+                device)
 
     # Hyperopt minimizes, so negate the accuracy to maximize it
+    end = time()
+    print("params:{}".format(params))
+    run_time = end-start
+    print("=======================")
+    print(f"Run Time:{run_time}")
+    
     return -accuracy
 
 
