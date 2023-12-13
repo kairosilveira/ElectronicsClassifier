@@ -91,5 +91,3 @@ def find_best_params(space, train_dir, val_dir, device, max_evals= 30):
         max_evals=max_evals
     )
     return best
-
-
