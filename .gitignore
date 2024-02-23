@@ -12,3 +12,7 @@ model/trained_models/*
 
 data/data_electronic/*
 !data/data_electronic/info.txt
+
+utils/plots
+
+mlruns

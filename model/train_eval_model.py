@@ -1,11 +1,12 @@
 import torch
-from multiprocessing import cpu_count
+
 import numpy as np
 import torchvision.datasets as datasets
 from model.model_class import ElectronicsClassifier
+from collections import namedtuple
+from experiment.config import N_CORES
 
-n_cores = cpu_count()
-def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_train, device):
+def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_train, device, learning_curve=False, val_dir=None, transform_val=None):
     """
     Train EletronicClassifier model on a given training dataset.
 
@@ -17,9 +18,11 @@ def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_trai
     optimizer (torch.optim.Optimizer): The optimizer for model weights adjustment.
     transform_train (torchvision.transforms.Compose): The data transformation for training.
     device (torch.device): The device (e.g., 'cpu' or 'cuda') on which to perform the training.
+    learning_curve (bool): Whether to return the learning curve information.
 
     Returns:
-    torch.nn.Module: The trained model.
+    torch.nn.Module or Tuple[torch.nn.Module, List[float]]: The trained model. If learning_curve is True, 
+    it also returns a list of training loss values for each epoch.
 
     This function trains a neural network model on the provided training dataset for the specified number of epochs
     using the specified hyperparameters and returns the trained model.
@@ -29,17 +32,23 @@ def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_trai
     >>> num_epochs = 10
     >>> batch_size = 32
     >>> lr = 0.001
-    >>> optimizer = optim.Adam
+    >>> optimizer = Adam
     >>> device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     >>> trained_model = train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_train, device)
     """
-
+    train_result = namedtuple(
+        'train_result',
+        ['model', 'train_loss_values', 'val_loss_values']
+    )
     # Create datasets
-    train_dir = datasets.ImageFolder(train_dir, transform=transform_train)
-    train_loader = torch.utils.data.DataLoader(train_dir, batch_size=batch_size, shuffle=True, num_workers=n_cores)
+    train_dataset = datasets.ImageFolder(train_dir, transform=transform_train)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=N_CORES)
+    if learning_curve:
+        val_dataset = datasets.ImageFolder(val_dir, transform=transform_val)
+        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=N_CORES)
     
     # Initialize the model
-    num_classes = len(train_dir.classes)
+    num_classes = len(train_dataset.classes)
     model = ElectronicsClassifier(num_classes)  # Import the model class
 
     # Define loss function and optimizer
@@ -48,6 +57,10 @@ def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_trai
 
     # Training loop
     model.to(device)
+
+    if learning_curve:
+        train_loss_values = []
+        val_loss_values = []
 
     for epoch in range(num_epochs):
         model.train()
@@ -64,7 +77,46 @@ def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_trai
 
             running_loss += loss.item()
 
-    return model
+        if learning_curve:
+            train_loss_values.append(running_loss / len(train_loader))
+            val_loss = get_validation_loss(model, criterion, val_loader, device)
+            val_loss_values.append(val_loss)
+
+    if learning_curve:
+        return train_result(
+            model=model,
+            train_loss_values=train_loss_values, 
+            val_loss_values=val_loss_values)
+    else:
+        return train_result(
+            model=model,
+            train_loss_values=None, 
+            val_loss_values=None)
+
+
+def get_validation_loss(model, criterion, val_loader, device):
+    """
+    Calculate validation loss for the provided model.
+
+    Args:
+    model (torch.nn.Module): The trained model.
+    criterion (torch.nn.Module): The loss criterion.
+    val_loader (torch.utils.data.DataLoader): DataLoader for the validation dataset.
+    device (torch.device): The device (e.g., 'cpu' or 'cuda').
+
+    Returns:
+    float: Validation loss.
+    """
+    model.eval()
+    val_loss = 0.0
+    with torch.no_grad():
+        for inputs, labels in val_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+
+    return val_loss / len(val_loader)
 
 
 def eval_model(model, test_dir, transform_test, batch_size, device):
@@ -90,12 +142,16 @@ def eval_model(model, test_dir, transform_test, batch_size, device):
     >>> device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     >>> accuracy, confusion = eval_model(trained_model, test_dir, transform_test, batch_size, device)
     """
+    metrics = namedtuple(
+        'metrics',
+        ['accuracy', 'confusion_matrix']
+    )
 
     # Evaluation on the test dataset
     model.eval()
 
     test_dataset = datasets.ImageFolder(test_dir, transform=transform_test)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=n_cores)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=N_CORES)
 
     # Get the number of samples in the test dataset
     num_samples = len(test_dataset)
@@ -123,7 +179,8 @@ def eval_model(model, test_dir, transform_test, batch_size, device):
     acc = accuracy(y_true, y_pred)
     confusion = confusion_matrix(y_true, y_pred)
 
-    return acc, confusion
+    return metrics(accuracy=acc, confusion_matrix=confusion)
+
 
 
 def accuracy(y_true, y_pred):
