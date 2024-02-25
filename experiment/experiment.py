@@ -1,31 +1,28 @@
 import os
 from utils.plots import plot_confusion_matrix, plot_normalized_confusion_matrix, plot_learning_curve
-from utils.utils import get_class_names
-
-import torch.optim as optim
-import torch
-from hyperopt import hp, tpe, fmin
 from data.transforms import get_transform
 from data.split_data import split_data, merge_val_into_train
 from model.optimize_parameters import find_best_params
 from model.train_eval_model import train_model, eval_model
 from .config import *
-
+from time import time
 import mlflow
 
 
 class Experiment:
-    def __init__(self, data_path) -> None:
+    def __init__(self, data_path, experiment_name = 'resistor_classifier') -> None:
         self.data_path = os.path.join(ROOT_DIR_PATH,data_path)
+        self.experiment_name = experiment_name
+
         self.train_path = None
         self.test_path = None
         self.val_path = None 
 
         self._set_data_paths()
 
-    def run(self):
-
-        with mlflow.start_run():
+    def run(self, run_name=None):
+        start_time = time()
+        with mlflow.start_run(run_name=run_name):
             split_data(self.data_path, 
                     self.train_path, 
                     self.test_path,
@@ -41,6 +38,8 @@ class Experiment:
             #train a model with best params and evaluate
             merge_val_into_train(self.train_path, self.val_path)
             self.train_params = self._get_train_params(best_hyper_params)
+
+            print("starting training")
             train_results = train_model(**self.train_params)
             model = train_results.model
             # Log model
@@ -49,6 +48,7 @@ class Experiment:
             train_losses = train_results.train_loss_values
             test_losses = train_results.val_loss_values
 
+            
             plot_learning_curve(train_losses,test_losses)
             mlflow.log_artifact('utils/plots/learning_curve.png')
 
@@ -59,11 +59,16 @@ class Experiment:
             confusion_matrix = eval_metrics.confusion_matrix
             mlflow.log_metrics({'accuracy': accuracy})
 
-            classes = get_class_names(self.data_path)
-            plot_confusion_matrix(confusion_matrix, classes) 
-            plot_normalized_confusion_matrix(confusion_matrix, classes) 
+            plot_confusion_matrix(confusion_matrix, model.classes) 
+            plot_normalized_confusion_matrix(confusion_matrix, model.classes) 
             mlflow.log_artifact('utils/plots/confusion_matrix.png')
             mlflow.log_artifact('utils/plots/normalized_confusion_matrix.png')
+
+            end_time = time()
+            run_time = end_time-start_time
+            mlflow.log_param('run_time',run_time)
+
+
 
 
 

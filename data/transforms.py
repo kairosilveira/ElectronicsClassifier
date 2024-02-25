@@ -6,14 +6,13 @@ def get_transform(type, params):
 
     # Transform params
     scale_factor = params['scale_factor']
-    degrees = params['degrees']
-    brightness_factor = params['brightness_factor']
-    contrast_factor = params['contrast_factor']
-    saturation_factor = params['saturation_factor']
-    hue_factor = params['hue_factor']
-
-
     if type == 'train':
+        degrees = params['degrees']
+        brightness_factor = params['brightness_factor']
+        contrast_factor = params['contrast_factor']
+        saturation_factor = params['saturation_factor']
+        hue_factor = params['hue_factor']
+        
         return transforms.Compose([
         AutoOrient(),  # Automatically orient the image
         MakeSquare(),  # Center crop to make it square
