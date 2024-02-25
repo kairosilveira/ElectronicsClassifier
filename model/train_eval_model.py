@@ -4,7 +4,7 @@ import numpy as np
 import torchvision.datasets as datasets
 from model.model_class import ElectronicsClassifier
 from collections import namedtuple
-from experiment.config import N_CORES
+from experiment.config import N_CORES, N_LAYERS_UNFROZEN
 
 def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_train, device, learning_curve=False, val_dir=None, transform_val=None):
     """
@@ -40,6 +40,7 @@ def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_trai
         'train_result',
         ['model', 'train_loss_values', 'val_loss_values']
     )
+    
     # Create datasets
     train_dataset = datasets.ImageFolder(train_dir, transform=transform_train)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=N_CORES)
@@ -48,8 +49,7 @@ def train_model(train_dir, num_epochs, batch_size, lr, optimizer, transform_trai
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=N_CORES)
     
     # Initialize the model
-    num_classes = len(train_dataset.classes)
-    model = ElectronicsClassifier(num_classes)  # Import the model class
+    model = ElectronicsClassifier(train_dataset.classes, n_layers_unfrozen=N_LAYERS_UNFROZEN)  
 
     # Define loss function and optimizer
     criterion = torch.nn.CrossEntropyLoss()

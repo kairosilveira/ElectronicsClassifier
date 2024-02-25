@@ -2,7 +2,7 @@ from hyperopt import hp, tpe, fmin
 from model.train_eval_model import train_model, eval_model
 from data.transforms import get_transform
 from functools import partial 
-from time import time
+
 
 import torch.optim as optim
 
@@ -10,7 +10,7 @@ import torch.optim as optim
 # Define the objective function to minimize (maximize validation accuracy)
 def objective(params, train_dir, val_dir, device):
     
-    start = time()
+
     # train params
     num_epochs = int(params['num_epochs'])
     batch_size = params['batch_size']
@@ -41,11 +41,7 @@ def objective(params, train_dir, val_dir, device):
     accuracy = metrics_result.accuracy
 
     # Hyperopt minimizes, so negate the accuracy to maximize it
-    end = time()
-    run_time = end-start
-    print("=======================")
-    print(f"Run Time:{run_time}")
-    
+
     return -accuracy
 
 
@@ -66,10 +62,13 @@ def fix_params(params):
         1:optim.Adam, 
         2:optim.RMSprop
     }
-    params['optimizer'] = optmizers[params['optimizer']] 
-    params['num_epochs'] = int(params['num_epochs'])
 
-    params['batch_size'] = int(params['batch_size'])
-    if params['batch_size'] <1:
-        params['batch_size'] = 1
+    batch_sizes = {
+        0:16,
+        1:32,
+        2:64
+    }
+    params['optimizer'] = optmizers[params['optimizer']] 
+    params['batch_size'] = batch_sizes[params['batch_size']]
+    params['num_epochs'] = int(params['num_epochs'])
     return params
