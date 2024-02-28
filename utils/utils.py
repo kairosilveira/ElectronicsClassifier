@@ -30,7 +30,7 @@ def get_best_run_id(metric):
     
 def load_model(run_id):
     model_path = f'mlruns/0/{run_id}/artifacts/model'
-    best_model = mlflow.pytorch.load_model(model_path)
+    best_model = mlflow.pytorch.load_model(model_path,map_location=torch.device('cpu'))
     return best_model
 
 
@@ -45,3 +45,11 @@ def load_best_model_and_transform():
     params = load_run_params(best_run_id)
     transform = get_transform('test', params)
     return best_model, transform 
+
+
+def get_transform_img():
+    best_run_id = get_best_run_id('accuracy')
+    params = load_run_params(best_run_id)
+    transform = get_transform('img', params)
+    return transform
+

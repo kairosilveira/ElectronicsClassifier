@@ -40,4 +40,9 @@ class ElectronicsClassifier(nn.Module):
         with torch.no_grad():
             output = self.forward(input)
             probabilities = torch.nn.functional.softmax(output[0], dim=0)
-        return probabilities
+            prediction = {
+                'class':self.classes[torch.argmax(probabilities).item()],
+                'prob': torch.max(probabilities).item()
+            }
+            
+        return prediction

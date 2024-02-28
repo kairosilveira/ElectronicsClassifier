@@ -14,5 +14,6 @@ data/data_electronic/*
 !data/data_electronic/info.txt
 
 utils/plots
+!utils/plots/info.txt
 
 mlruns
