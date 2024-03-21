@@ -6,9 +6,9 @@ from utils.utils import load_best_model_and_transform, get_transform_img
 
 def setup_camera():
     cap = cv2.VideoCapture(0)
-    # resolution_width, resolution_height = 2160, 3840
-    # cap.set(3, resolution_width)  # Set the width
-    # cap.set(4, resolution_height)  # Set the height
+    resolution_width, resolution_height = 2160, 3840
+    cap.set(3, resolution_width)  # Set the width
+    cap.set(4, resolution_height)  # Set the height
     return cap
 
 
@@ -34,7 +34,7 @@ def preprocess_frame(frame, transform, transform_img, model):
 
 
 def display_result(frame, predicted_class, probability):
-    if probability > 0.90:
+    if probability > 0.70:
         label = f"Resistor of {predicted_class} (Probability: {round(probability, 2)})"
     else:
         label = "not recognized"

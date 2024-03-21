@@ -45,5 +45,4 @@ def get_transform(type, params):
         AutoOrient(),  # Automatically orient the image
         MakeSquare(),  # Center crop to make it square
         ReduceImage(scale_factor),  # Apply reduction
-        # transforms.Resize((224, 224)),  # Resize to a standard size
     ])
