@@ -1,6 +1,7 @@
 import argparse
 from experiment.experiment import Experiment
 from app.camera_app import run
+import os 
 
 def main():
     parser = argparse.ArgumentParser(description='Run experiments or app.')
@@ -14,7 +15,7 @@ def main():
     args = parser.parse_args()
 
     if args.mode == 'exp':
-        data_dir = "data/data_electronic/raw"
+        data_dir = os.path.join("data", "data_electronic", "raw")
         exp = Experiment(data_dir)
         exp.run(run_name=args.run_name)
     elif args.mode == 'app':

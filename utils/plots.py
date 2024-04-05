@@ -32,7 +32,7 @@ def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blu
         for j in range(len(classes)):
             plt.text(j, i, str(cm[i, j]), ha='center', va='center', color='white' if cm[i, j] > cm.max() / 2 else 'black')
 
-    img_path = os.path.join(ROOT_DIR_PATH, 'utils/plots/confusion_matrix.png')
+    img_path = os.path.join(ROOT_DIR_PATH, 'utils', 'plots', 'confusion_matrix.png')
     plt.savefig(img_path)
 
 
@@ -68,7 +68,7 @@ def plot_normalized_confusion_matrix(cm, classes, title='Normalized Confusion Ma
         for j in range(len(classes)):
             plt.text(j, i, f'{normalized_cm[i, j]:.2f}', ha='center', va='center', color='white' if normalized_cm[i, j] > 0.5 else 'black')
 
-    img_path = os.path.join(ROOT_DIR_PATH, 'utils/plots/normalized_confusion_matrix.png')
+    img_path = os.path.join(ROOT_DIR_PATH, 'utils', 'plots', 'normalized_confusion_matrix.png')
     plt.savefig(img_path)
 
 
@@ -95,5 +95,6 @@ def plot_learning_curve(train_losses, test_losses, title='Learning Curve', xlabe
     plt.legend()
     plt.grid(True)
 
-    img_path = os.path.join(ROOT_DIR_PATH, 'utils/plots/learning_curve.png')
+    img_path = os.path.join(ROOT_DIR_PATH, 'utils', 'plots', 'learning_curve.png')
+
     plt.savefig(img_path)

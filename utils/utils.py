@@ -29,7 +29,7 @@ def get_best_run_id(metric):
         raise ValueError("No runs found")
     
 def load_model(run_id):
-    model_path = f'mlruns/0/{run_id}/artifacts/model'
+    model_path = os.path.join('mlruns', '0', run_id, 'artifacts', 'model')
     best_model = mlflow.pytorch.load_model(model_path,map_location=torch.device('cpu'))
     return best_model
 

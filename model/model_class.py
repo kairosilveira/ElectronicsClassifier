@@ -16,14 +16,15 @@ class ElectronicsClassifier(nn.Module):
         total_layers = sum(len(list(child.parameters())) for child in self.base_model.children())
         layers_unfrozen = 0
 
-        for child in self.base_model.children():
-            for param in child.parameters():
-                param.requires_grad = False
-                layers_unfrozen += 1
+        if not n_layers_unfrozen ==  'all':
+            for child in self.base_model.children():
+                for param in child.parameters():
+                    param.requires_grad = False
+                    layers_unfrozen += 1
+                    if layers_unfrozen == total_layers - n_layers_unfrozen:
+                        break
                 if layers_unfrozen == total_layers - n_layers_unfrozen:
                     break
-            if layers_unfrozen == total_layers - n_layers_unfrozen:
-                break
 
     def forward(self, x):
         return self.base_model(x)    

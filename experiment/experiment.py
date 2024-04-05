@@ -23,12 +23,15 @@ class Experiment:
     def run(self, run_name=None):
         start_time = time()
         with mlflow.start_run(run_name=run_name):
+            print("spliting data")
             split_data(self.data_path, 
                     self.train_path, 
                     self.test_path,
                     self.val_path,
                     split_ratio=SPLIT_RATIO)
             
+            print("starting optimization")
+            print("NÃO DESLIGUE O COMPUTADOR")
             hyper_opt_params = self._get_hyper_opt_params()
             best_hyper_params = find_best_params(**hyper_opt_params) 
 
@@ -50,7 +53,7 @@ class Experiment:
 
             
             plot_learning_curve(train_losses,test_losses)
-            mlflow.log_artifact('utils/plots/learning_curve.png')
+            mlflow.log_artifact(os.path.join('utils', 'plots', 'learning_curve.png'))
 
             eval_params = self._get_eval_params(model) 
             eval_metrics = eval_model(**eval_params)
@@ -61,8 +64,10 @@ class Experiment:
 
             plot_confusion_matrix(confusion_matrix, model.classes) 
             plot_normalized_confusion_matrix(confusion_matrix, model.classes) 
-            mlflow.log_artifact('utils/plots/confusion_matrix.png')
-            mlflow.log_artifact('utils/plots/normalized_confusion_matrix.png')
+
+            mlflow.log_artifact(os.path.join('utils', 'plots', 'confusion_matrix.png'))
+            mlflow.log_artifact(os.path.join('utils', 'plots', 'normalized_confusion_matrix.png'))
+
 
             end_time = time()
             run_time = end_time-start_time
@@ -73,9 +78,10 @@ class Experiment:
 
 
     def _set_data_paths(self):
-        self.train_path = os.path.join(ROOT_DIR_PATH, "data/data_electronic/train")
-        self.test_path = os.path.join(ROOT_DIR_PATH, "data/data_electronic/test")
-        self.val_path = os.path.join(ROOT_DIR_PATH, "data/data_electronic/val")
+        # Constructing paths for train, test, and validation data directories
+        self.train_path = os.path.join(ROOT_DIR_PATH, "data", "data_electronic", "train")
+        self.test_path = os.path.join(ROOT_DIR_PATH, "data", "data_electronic", "test")
+        self.val_path = os.path.join(ROOT_DIR_PATH, "data", "data_electronic", "val")
 
     def _get_hyper_opt_params(self):
         hyper_opt_params = {
