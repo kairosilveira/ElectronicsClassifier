@@ -34,7 +34,7 @@ def preprocess_frame(frame, transform, transform_img, model):
 
 
 def display_result(frame, predicted_class, probability):
-    if probability > 0.70:
+    if probability > 0.40:
         label = f"Resistor of {predicted_class} (Probability: {round(probability, 2)})"
     else:
         label = "not recognized"

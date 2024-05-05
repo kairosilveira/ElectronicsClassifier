@@ -11,8 +11,8 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 SPLIT_RATIO = (0.6,0.2,0.2)
 
 SPACE_PARAMS = {
-    # 'num_epochs': hp.choice('num_epochs', [1]),
-    'num_epochs': hp.quniform('num_epochs', 3, 20, 1),
+    'num_epochs': hp.choice('num_epochs', [1]),
+    # 'num_epochs': hp.quniform('num_epochs', 3, 20, 1),
     # 'batch_size': hp.choice('batch_size', [32]),
     'batch_size': hp.choice('batch_size', [16,32,64]),
     'lr': hp.loguniform('lr', -5, -2),
@@ -32,4 +32,3 @@ MAX_EVALS = 100
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 N_LAYERS_UNFROZEN = 'all'
-#N_LAYERS_UNFROZEN = 1
