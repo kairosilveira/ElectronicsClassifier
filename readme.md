@@ -1,6 +1,3 @@
-Certainly! Here's a revised README tailored to your project structure and features:
-
----
 
 # Deep Learning for Electronic Component Classification
 
